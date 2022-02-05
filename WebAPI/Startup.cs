@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using WebAPI.ActionFilters;
 using WebAPI.Extensions;
 
 namespace WebAPI
@@ -42,7 +43,8 @@ namespace WebAPI
             services.AddControllers(config => {
                 config.RespectBrowserAcceptHeader = true;
                 config.ReturnHttpNotAcceptable = true;
-                }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();         
+                }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
+            services.AddScoped<ValidationFilterAttribute>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPI", Version = "v1" });

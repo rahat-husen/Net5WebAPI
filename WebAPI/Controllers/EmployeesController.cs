@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebAPI.ActionFilters;
 
 namespace WebAPI.Controllers
 {
@@ -63,18 +64,9 @@ namespace WebAPI.Controllers
 
         [HttpPost]
         [Route("AddEmployee")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public IActionResult AddEmployee(Guid companyId,[FromBody] EmployeeForCreationDto employeeDTO)
-        {
-            if(employeeDTO is null)
-            {
-                _logger.LogError("EmployeeDTO is null");
-                return BadRequest("EmployeeDTO is null");
-            }
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("EmployeeCreation dto is not valid");
-                return UnprocessableEntity(ModelState);
-            }
+        {            
             var employeeEntity = _mapper.Map<Employee>(employeeDTO);
             _repositoryManager.Employee.CreateEmployeeForCompany(companyId, employeeEntity);
             _repositoryManager.SaveAsync();
