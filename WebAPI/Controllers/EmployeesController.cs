@@ -33,6 +33,8 @@ namespace WebAPI.Controllers
         [Route("GetEmployees")]
         public async Task<IActionResult> GetEmployees(Guid companyId,[FromQuery] EmployeeParameters employeeParameters)
         {
+            if (!employeeParameters.HasValidRange)
+                return BadRequest("max age cannot be less than min age");
             var company = await _repositoryManager.Company.GetCompany(companyId, trackChanges: false);
             if(company is null)
             {
