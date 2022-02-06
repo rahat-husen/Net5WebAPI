@@ -2,9 +2,11 @@
 using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
+using Entities.RequestFeatures;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,15 +31,16 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         [Route("GetEmployees")]
-        public IActionResult GetEmployees(Guid companyId)
+        public async Task<IActionResult> GetEmployees(Guid companyId,[FromQuery] EmployeeParameters employeeParameters)
         {
-            var company = _repositoryManager.Company.GetCompany(companyId, trackChanges: false);
+            var company = await _repositoryManager.Company.GetCompany(companyId, trackChanges: false);
             if(company is null)
             {
                 _logger.LogError($"Company with {companyId} is not there");
                 return NotFound();
             }
-            var employees = _repositoryManager.Employee.GetEmployees(companyId, trackChanges: false);
+            var employees =await _repositoryManager.Employee.GetEmployees(companyId, employeeParameters, trackChanges: false);
+            Response.Headers.Add("X-Pagination",JsonConvert.SerializeObject(employees.MetaData));
             var employeesDTO = _mapper.Map<IEnumerable<EmployeeDto>>(employees);
             return Ok(employeesDTO);
         }
