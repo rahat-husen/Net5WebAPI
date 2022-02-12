@@ -1,4 +1,5 @@
 ﻿using Entities.Models;
+using Entities.RequestFeatures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Contracts
 {
     public interface ICompanyRepository
     {
-        Task<IEnumerable<Company>> GetAllCompanies(bool trackChanges);
+        Task<IEnumerable<Company>> GetAllCompanies(CompanyParameters companyParameters, bool trackChanges);
         Task<Company> GetCompany(Guid id, bool trackChanges);
         Task<IEnumerable<Company>> GetCompanyByIds(IEnumerable<Guid> ids, bool trackChnages);
 

@@ -2,6 +2,8 @@
 using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
+using Entities.RequestFeatures;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -12,8 +14,10 @@ using WebAPI.ModelBinders;
 
 namespace Net5WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/{v:apiversion}/[controller]")]
     [ApiController]
+   // [ResponseCache(CacheProfileName = "120SecDuration")]
     public class CompaniesController : ControllerBase
     {
         private IRepositoryManager _repositoryManager;
@@ -26,11 +30,12 @@ namespace Net5WebAPI.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet,Authorize]
         [Route("GetCompanies")]
-        public async Task<IActionResult> GetCompanies()
+        
+        public async Task<IActionResult> GetCompanies([FromQuery] CompanyParameters companyParameters)
         {
-            var companies =await _repositoryManager.Company.GetAllCompanies(trackChanges: false);
+            var companies =await _repositoryManager.Company.GetAllCompanies(companyParameters,trackChanges: false);
             var companiesDto = _mapper.Map<IEnumerable<CompanyDto>>(companies);
             return Ok(companiesDto);
         }
@@ -140,6 +145,13 @@ typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
             _mapper.Map(company,companyEntity);
             await _repositoryManager.SaveAsync();
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetCompaniesOptions()
+        {
+            Response.Headers.Add("Allow","Options,Get,Post");
+            return Ok();
         }
     }
 }

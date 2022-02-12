@@ -15,7 +15,8 @@ using WebAPI.ActionFilters;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/companies/{companyId}/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/{v:apiversion}/companies/{companyId}/[controller]")]
     [ApiController]
     public class EmployeesController : ControllerBase
     {
@@ -30,6 +31,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
+        [HttpHead]
         [Route("GetEmployees")]
         public async Task<IActionResult> GetEmployees(Guid companyId,[FromQuery] EmployeeParameters employeeParameters)
         {

@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using Contracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,15 +40,50 @@ namespace WebAPI
             services.ConfigureLoggerService();
             services.ConfigureSqlContext(Configuration);
             services.ConfigureRepositoryManager();
+            services.ConfigureVersioning();
             services.AddAutoMapper(typeof(Startup));
             services.AddControllers(config => {
                 config.RespectBrowserAcceptHeader = true;
                 config.ReturnHttpNotAcceptable = true;
+                config.CacheProfiles.Add("120SecDuration", new CacheProfile { Duration = 120 });
                 }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
+            services.AddCustomMediaTypes();
             services.AddScoped<ValidationFilterAttribute>();
+            services.ConfigureResponseCaching();
+            services.ConfigureHttpCacheHeaders();
+            services.AddMemoryCache();
+            services.ConfigureRateLimitingOptions();
+            services.AddHttpContextAccessor();
+            services.AddAuthentication();
+            services.ConfigureIdentity();
+            services.ConfigureJWT(Configuration);
+            services.AddScoped<IAuthenticationManager, AuthenticationManager>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPI", Version = "v1" });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Place to add JWT with Bearer",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                       new OpenApiSecurityScheme
+                       {
+                           Reference=new OpenApiReference
+                           {
+                               Type=ReferenceType.SecurityScheme,
+                               Id="Bearer"
+                           },
+                           Name="Bearer",
+                       },
+                       new List<string>()
+                    }
+                });
             });
         }
 
@@ -72,9 +108,11 @@ namespace WebAPI
             {
                 ForwardedHeaders = ForwardedHeaders.All
             });
-
+            app.UseResponseCaching();
+            app.UseHttpCacheHeaders();
+            app.UseIpRateLimiting();
+            app.UseAuthentication();
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
