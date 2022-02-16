@@ -122,5 +122,11 @@ namespace Net5WebAPI.Extensions
                 };
             });
         }
+
+        public static void ConfigureRedisCache(this IServiceCollection services) => services.AddStackExchangeRedisCache(opt =>
+        {
+            opt.Configuration = "localhost:8009";
+            opt.InstanceName = "Net5webAPI";
+        });
     }
 }

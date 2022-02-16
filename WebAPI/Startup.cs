@@ -49,15 +49,16 @@ namespace WebAPI
                 }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
             services.AddCustomMediaTypes();
             services.AddScoped<ValidationFilterAttribute>();
-            services.ConfigureResponseCaching();
-            services.ConfigureHttpCacheHeaders();
-            services.AddMemoryCache();
-            services.ConfigureRateLimitingOptions();
+            //services.ConfigureResponseCaching();
+            //services.ConfigureHttpCacheHeaders();
+            //services.AddMemoryCache();
+            //services.ConfigureRateLimitingOptions();
             services.AddHttpContextAccessor();
             services.AddAuthentication();
             services.ConfigureIdentity();
             services.ConfigureJWT(Configuration);
             services.AddScoped<IAuthenticationManager, AuthenticationManager>();
+            services.ConfigureRedisCache();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPI", Version = "v1" });
@@ -108,9 +109,9 @@ namespace WebAPI
             {
                 ForwardedHeaders = ForwardedHeaders.All
             });
-            app.UseResponseCaching();
-            app.UseHttpCacheHeaders();
-            app.UseIpRateLimiting();
+            //app.UseResponseCaching();
+            //app.UseHttpCacheHeaders();
+            //app.UseIpRateLimiting();
             app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
